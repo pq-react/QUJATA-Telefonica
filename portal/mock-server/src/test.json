@@ -1,0 +1,67 @@
+{
+  "id": 1,
+  "name": "test1",
+  "description": "simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,",
+  "start_time": "1704022565",
+  "end_time": "1704023405",
+  "environment_info": {
+    "codeRelease": "1.1.0",
+    "cpu": "RELACE_WITH_CPU",
+    "cpuArchitecture": "RELACE_WITH_CPU_ARCHITECTURE",
+    "cpuClockSpeed": "RELACE_WITH_CLOCK_SPEED",
+    "cpuCores": 0,
+    "nodeSize": "RELACE_WITH_NODE_SIZE",
+    "operatingSystem": "RELACE_WITH_OPERATING_SYSTEM",
+    "resourceName": "RELACE_WITH_RESOURCE_NAME"
+  },
+  "test_runs": [
+    {
+      "id":1,
+      "algorithm": "bikel1",
+      "iterations": 1000,
+      "message_size": 1024,
+      "results": {
+        "average_cpu": 3.5,
+        "average_memory": 3,
+        "bytes_throughput": 11,
+        "request_throughput": 21
+      }
+    },
+    {
+      "id":2,
+      "algorithm": "bikel1",
+      "iterations": 2000,
+      "message_size": 2048,
+      "results": {
+        "average_cpu": 7.0,
+        "average_memory": 6,
+        "bytes_throughput": 12,
+        "request_throughput": 24
+      }
+    },
+    {
+     "id":3,
+      "algorithm": "mlkem512",
+      "iterations": 1000,
+      "message_size": 1024,
+      "results": {
+        "average_cpu": 1.7,
+        "average_memory": 2,
+        "bytes_throughput": 20,
+        "request_throughput": 30
+      }
+    },
+    {
+      "id":4,
+      "algorithm": "mlkem512",
+      "iterations": 2000,
+      "message_size": 1024,
+      "results": {
+        "average_cpu": 2.6,
+        "average_memory": 2,
+        "bytes_throughput": 10,
+        "request_throughput": 20
+      }
+    }
+  ]
+}

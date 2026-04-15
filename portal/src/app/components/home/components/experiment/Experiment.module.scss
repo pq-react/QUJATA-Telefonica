@@ -1,0 +1,21 @@
+@import "src/styles/variables-keys";
+
+.experiment_wrapper {
+    padding: 40px;
+}
+
+.tabs_and_options_wrapper {
+    position: sticky;
+    inset-block-start: 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    z-index: 1;
+    background-color: rgba(var($applicationContentBackgroundColor), 1);
+    padding-block-end: 1%;
+    margin-block-end: -1.5%;
+}
+
+.table_options_wrapper {
+    position: relative;
+}

@@ -1,0 +1,26 @@
+@import "src/styles/variables-keys";
+
+table {
+  margin-block-start: 10px;
+  border-spacing: 0;
+  border: 1px solid var($backgroundColorGray);
+  inline-size: 100%;
+  table-layout: fixed;
+}
+
+.table_titles {
+  padding: 16px;
+  background-color: var($attPurple);
+  color: var($backgroundColorWhite);
+
+  .sort_style {
+    cursor: pointer;
+  }
+}
+
+.table_content {
+  background-color: var($backgroundColorWhite);
+  padding: 16px;
+  border-block-end: 1px solid var($backgroundColorGray);
+  vertical-align: middle;
+}

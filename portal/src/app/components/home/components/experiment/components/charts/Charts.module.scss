@@ -1,0 +1,41 @@
+@import "src/styles/variables-keys";
+
+.charts_content {
+    margin-block-start: 20px;
+}
+
+.charts_wrapper {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+.chart {
+    flex: 0 0 50%;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 0 10px 10px 0;
+
+    &:nth-child(2n) {
+        padding-inline-end: 0;
+    }
+}
+
+.title {
+    font-family: var($fontMedium);
+    font-size: 18px;
+    margin-block-end: 20px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-block-end: 30px;
+}
+
+.chart_item {
+    flex: 0 0 calc(50% - 15px);
+    box-sizing: border-box;
+    max-inline-size: 830px;
+    margin-block-end: 16px;
+}

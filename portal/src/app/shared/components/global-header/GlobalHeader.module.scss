@@ -1,0 +1,52 @@
+@import "src/styles/variables-keys";
+
+$headerFontSize: 16px;
+$headerBackgroundColor: #6D3FFC;
+$headerSuperReader: #e1baff;
+$headerSuperUser: #a4f1c1;
+
+.global_header {
+  background-color: $headerBackgroundColor;
+  block-size: var($headerSize);
+  color: var($primaryWhite);
+  display: flex;
+  font-size: $headerFontSize;
+  line-height: var($headerSize);
+  padding-inline-end: var($layoutPadding);
+  padding-inline-start: 32px;
+  position: sticky;
+  inset-block-start: 0;
+  inline-size: 100%;
+  z-index: 2;
+}
+
+.header_left_block,
+.header_right_block {
+  align-items: center;
+  display: flex;
+}
+
+.header_left_block {
+  margin-inline-end: 124px;
+}
+
+.home_icon {
+  margin-inline-end: 10px;
+  block-size: 100%;
+  inline-size: 100%;
+}
+
+.avatar_style {
+  block-size: 24px;
+  inline-size: 24px;
+}
+
+.name {
+  margin-inline-end: 20px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  block-size: 30px;
+}

@@ -1,0 +1,5 @@
+{
+    "classic": ["prime256v1","secp384r1"],
+    "hybrid": ["p256_mlkem512","p384_mlkem768","X25519MLKEM768"],
+    "quantumSafe": ["bikel1","bikel3","mlkem512","mlkem768","mlkem1024","frodo640aes","frodo640shake","frodo976aes","frodo976shake","frodo1344aes","frodo1344shake"]
+}
