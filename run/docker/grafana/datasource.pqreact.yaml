@@ -1,0 +1,49 @@
+# Copyright 2026 Telefónica Innovación Digital (alexandremiquel.frauamar.practicas@telefonica.com, antonio.pastorperales@telefonica.com)
+# PQ-REACT testbed variant of datasource.yaml (used by docker-compose.pqreact.yml).
+# qujata-mysql and cam-influxdb were created through the Grafana UI on the
+# testbed; they are provisioned here with the same uids so the dashboards
+# (dashboard.pqreact.json, pm_metrics.json) resolve them. Secrets come from
+# the container environment (see ../.env.example).
+
+apiVersion: 1
+
+datasources:
+  - name: 'Prometheus'
+    type: 'prometheus'
+    url: 'http://prometheus:9090'
+    uid: 'PB08949F94AB73929'
+  - name: 'Infinity'
+    type: 'yesoreyeram-infinity-datasource'
+    uid: 'PD0067CAD9A63E081'
+    access: proxy
+    isDefault: false
+    editable: true
+  # Backs every panel of the "Qujata Analysis" dashboard (dashboard.pqreact.json)
+  - name: 'qujata-mysql'
+    type: 'mysql'
+    uid: 'efl52eemna3nka'
+    access: proxy
+    url: 'qujata-mysql:3306'
+    user: 'root'
+    database: 'qujata'
+    jsonData:
+      database: 'qujata'
+    secureJsonData:
+      password: '$MYSQL_ROOT_PASSWORD'
+    editable: true
+  # Backs the "PM_metrics" dashboard (pm_metrics.json): NUC hardware/power
+  # metrics from the CAM InfluxDB, which was NOT part of this stack (the
+  # cam-influxdb container was not running when the VM was snapshotted).
+  - name: 'cam-influxdb'
+    type: 'influxdb'
+    uid: 'dfl6nyfv3zh1ce'
+    access: proxy
+    url: 'http://cam-influxdb:8086'
+    jsonData:
+      version: 'Flux'
+      organization: 'pqreact'
+      defaultBucket: 'NUC_metrics'
+      tlsSkipVerify: true
+    secureJsonData:
+      token: '$CAM_INFLUXDB_TOKEN'
+    editable: true

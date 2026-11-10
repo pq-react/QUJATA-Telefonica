@@ -106,12 +106,16 @@ services:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-qujata}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD in .env}
       - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
-      # consumed by grafana/datasource.yaml (qujata-mysql datasource)
+      # consumed by grafana/datasource.pqreact.yaml
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - CAM_INFLUXDB_TOKEN=${CAM_INFLUXDB_TOKEN:-}
     volumes:
       - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
-      - ./grafana/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
-      - ./grafana/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
+      - ./grafana/datasource.pqreact.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+      # "Qujata Analysis" (MySQL-backed panels) - was grafana/dashboard.json on the VM
+      - ./grafana/dashboard.pqreact.json:/var/lib/grafana/dashboards/dashboard.json
+      # "PM_metrics" - UI-imported on the VM, exported via the Grafana HTTP API
+      - ./grafana/pm_metrics.json:/var/lib/grafana/dashboards/pm_metrics.json
       # Note: on the testbed grafana_data was declared but NOT mounted, so the
       # Grafana DB lived in the container layer. Uncomment to persist it:
       # - grafana_data:/var/lib/grafana
