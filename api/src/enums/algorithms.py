@@ -17,6 +17,7 @@ class QuantumSafeAlgorithms(Enum):
     FRODO1344SHAKE = 'frodo1344shake'
 
 class ClassicAlgorithms(Enum):
+    CLASSICAL = 'classical'
     PRIME256V1 = 'prime256v1'
     SECP384R1 = 'secp384r1'
 
