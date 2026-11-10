@@ -1,0 +1,157 @@
+# QUJATA trimmed stack used on the PQ-REACT Katana/5G testbed instance.
+# Snapshot of the compose file that ran on the testbed VM (sanitised: testbed
+# endpoints and credentials moved to .env, see .env.example).
+#
+# Keeps: portal, api, mysql, grafana, prometheus, pushgateway, cadvisor
+# Drops: secgw1, secgw2, iperf, curl, nginx (the IPsec gateways and the
+#        iperf runner live on the slicing testbed and are reached over HTTP
+#        through SECGW1_URL / SECGW2_URL / IPERF_URL).
+#
+# Usage (from this directory):
+#   cp .env.example .env   # fill in values
+#   docker network create server_mcp   # only if the MCP server stack is not up
+#   docker compose -p docker -f docker-compose.pqreact.yml up -d --build
+# See docs/DEPLOYMENT_PQREACT.md.
+
+services:
+  pushgateway:
+    image: prom/pushgateway:latest        # ran as v1.11.2
+    container_name: qujata-pushgateway
+    ports:
+      - "9091:9091"
+    networks:
+      - myservices-net3
+
+  mysql:
+    build:
+      context: ../../mysql
+    container_name: qujata-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: qujata
+    ports:
+      - "3306:3306"
+    networks:
+      - myservices-net3
+
+  api:
+    build:
+      context: ../../api
+    container_name: qujata-api
+    ports:
+      - "3020:3020"
+    environment:
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=docker
+      - REQUEST_TIMEOUT=120
+      - ITERATIONS_OPTIONS=100:500:1000:2000:5000:10000:50000
+      - MESSAGE_SIZES_OPTIONS=0:1:2:100:1024:102400:204800:1048576:2097152:10485760
+      - DATABASE_URI=mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@qujata-mysql:3306/qujata
+      - DEFAULT_GROUPS=classical:mlkem512:mlkem768:mlkem1024:p256_mlkem512:p384_mlkem768:X25519MLKEM768
+      # Katana/5G adapter endpoints (slicing testbed)
+      - SECGW1_URL=${SECGW1_URL:-}
+      - SECGW2_URL=${SECGW2_URL:-}
+      - IPERF_URL=${IPERF_URL:-}
+      - IPERF_METRICS_URL=${IPERF_METRICS_URL:-}
+      - KATANA_NBI_URL=${KATANA_NBI_URL:-}
+      - KATANA_KPI_URL=${KATANA_KPI_URL:-}
+      # TLS mode disabled: empty CURL_URL makes /analyze route portal runs to iperf
+      - CURL_URL=
+      - CADVISOR_URL=http://qujata-cadvisor:8080
+      # Phase A - live push to MCP MariaDB (disabled when MCP_DB_HOST is empty)
+      - MCP_DB_HOST=${MCP_DB_HOST:-pqreact-mcp-mariadb}
+      - MCP_DB_PORT=${MCP_DB_PORT:-3306}
+      - MCP_DB_NAME=${MCP_DB_NAME:-PQREACT}
+      - MCP_DB_USER=${MCP_DB_USER:-pqreact}
+      - MCP_DB_PASSWORD=${MCP_DB_PASSWORD:-}
+    networks:
+      - myservices-net3
+      - mcp_net          # Phase A: cross-network so qujata-api can resolve pqreact-mcp-mariadb
+    depends_on:
+      - mysql
+
+  portal:
+    build:
+      context: ../../portal
+    container_name: qujata-portal
+    ports:
+      - "2000:80"
+    environment:
+      # Must be reachable from the user's browser (public host of this VM)
+      - PQC_PORTAL__BASE_API_URL=${PORTAL_API_URL:-http://localhost:3020/qujata-api}
+      - PQC_PORTAL__DASHBOARD_LINK_HOST=${PORTAL_DASHBOARD_URL:-http://localhost:3000}
+    networks:
+      - myservices-net3
+    depends_on:
+      - api
+
+  prometheus:
+    image: prom/prometheus:latest         # ran as v3.11.2
+    container_name: qujata-prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - myservices-net3
+
+  grafana:
+    image: grafana/grafana:latest         # ran as 13.0.1
+    container_name: qujata-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-qujata}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD in .env}
+      - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
+      # consumed by grafana/datasource.yaml (qujata-mysql datasource)
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+      - ./grafana/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - ./grafana/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
+      # Note: on the testbed grafana_data was declared but NOT mounted, so the
+      # Grafana DB lived in the container layer. Uncomment to persist it:
+      # - grafana_data:/var/lib/grafana
+    networks:
+      - myservices-net3
+
+  # On the testbed cAdvisor was started standalone with `docker run` (not by
+  # compose) and attached to docker_myservices-net3; this service reproduces
+  # the same run arguments. See docs/DEPLOYMENT_PQREACT.md.
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: qujata-cadvisor
+    restart: unless-stopped
+    privileged: true
+    command:
+      - --containerd=/run/containerd/containerd.sock
+      - --docker_only=true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /run/containerd/containerd.sock:/run/containerd/containerd.sock
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "8089:8080"
+    networks:
+      - myservices-net3
+
+volumes:
+  grafana_data:
+
+networks:
+  myservices-net3:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+  # Phase A: external network owned by the MCP server stack
+  # (mcp-server/server/docker-compose.server.yml, network `mcp` -> `server_mcp`).
+  # Bring that stack up first, or create the network manually.
+  mcp_net:
+    external: true
+    name: server_mcp
